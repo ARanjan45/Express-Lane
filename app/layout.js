@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "ExpressLane",
+  title: "Spectrum-ExpressLane",
   description: "Your AI course generator",
   
 

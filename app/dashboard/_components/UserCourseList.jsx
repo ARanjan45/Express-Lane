@@ -2,7 +2,6 @@
 import { useUser } from '@clerk/nextjs';
 import { eq } from 'drizzle-orm'
 import React, { use, useContext, useEffect, useState } from 'react'
-import { db } from '../../../configs/db';
 import { CourseList } from '../../../configs/schema';
 import CourseCard from './CourseCard';
 import { UserCourseListContext } from '../../_context/UserCourseListContext';
@@ -14,7 +13,8 @@ function UserCourseList() {
     user && getUserCourses()
   }, [user])
   const getUserCourses = async () => {
-    const result = await db.select().from(CourseList).where(eq(CourseList?.createdBy, user?.primaryEmailAddress?.emailAddress));
+    const res = await fetch('/api/courses/user');
+    const result = await res.json();
     setCourseList(result);
     setUserCourseList(result);
   }
@@ -25,8 +25,8 @@ function UserCourseList() {
         {courseList?.length > 0 ? courseList?.map((course, index) => (
           <CourseCard course={course} key={index} refreshData={() => getUserCourses()} />
         ))
-        :[1, 2, 3, 4, 5].map((item, index) => (<div key={index} className='w-full bg-slate-200 animate-pulse rounded-lg h-[270px]'></div>))
-          
+          : [1, 2, 3, 4, 5].map((item, index) => (<div key={index} className='w-full bg-slate-200 animate-pulse rounded-lg h-[270px]'></div>))
+
         }
       </div>
     </div>

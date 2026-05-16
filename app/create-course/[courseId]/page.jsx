@@ -1,7 +1,6 @@
 "use client"
 import { useUser } from '@clerk/nextjs';
 import React, { use, useEffect, useState } from 'react';
-import { CourseBasicInfo } from './_components/CourseBasicInfo';
 import CourseBasicInfo from './_components/CourseBasicInfo';
 import CourseDetail from './_components/CourseDetail';
 import ChapterList from './_components/ChapterList';

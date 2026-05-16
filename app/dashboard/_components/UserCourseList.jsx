@@ -1,23 +1,35 @@
 "use client"
 import { useUser } from '@clerk/nextjs';
-import { eq } from 'drizzle-orm'
-import React, { use, useContext, useEffect, useState } from 'react'
-import { db } from '../../../configs/db';
-import { CourseList } from '../../../configs/schema';
+import React, { useContext, useEffect, useState } from 'react'
 import CourseCard from './CourseCard';
 import { UserCourseListContext } from '../../_context/UserCourseListContext';
+
 function UserCourseList() {
   const [courseList, setCourseList] = useState([]);
   const { userCourseList, setUserCourseList } = useContext(UserCourseListContext);
   const { user } = useUser();
+
   useEffect(() => {
     user && getUserCourses()
   }, [user])
+
   const getUserCourses = async () => {
-    const result = await db.select().from(CourseList).where(eq(CourseList?.createdBy, user?.primaryEmailAddress?.emailAddress));
+    const email = user?.primaryEmailAddress?.emailAddress;
+    const res = await fetch(`/api/courses?email=${encodeURIComponent(email)}`);
+
+    const text = await res.text(); // read as text first
+    console.log('API response:', text); // check what's coming back
+
+    if (!text) {
+      console.error('Empty response from API');
+      return;
+    }
+
+    const result = JSON.parse(text);
     setCourseList(result);
     setUserCourseList(result);
   }
+
   return (
     <div className='mt-10'>
       <h2 className='font-medium text-xl'>My AI Courses</h2>
@@ -25,8 +37,9 @@ function UserCourseList() {
         {courseList?.length > 0 ? courseList?.map((course, index) => (
           <CourseCard course={course} key={index} refreshData={() => getUserCourses()} />
         ))
-        :[1, 2, 3, 4, 5].map((item, index) => (<div key={index} className='w-full bg-slate-200 animate-pulse rounded-lg h-[270px]'></div>))
-          
+          : [1, 2, 3, 4, 5].map((item, index) => (
+            <div key={index} className='w-full bg-slate-200 animate-pulse rounded-lg h-[270px]'></div>
+          ))
         }
       </div>
     </div>

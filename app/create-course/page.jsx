@@ -9,8 +9,6 @@ import { UserInputContext } from '../_context/UserInputContext';
 import { GenerateCourseLayout_AI } from '../../configs/AiModel'
 import LoadingDialog from '../create-course/_components/LoadingDialog'
 import { useUser } from '@clerk/nextjs';
-import { db } from '../../configs/db'; // Assuming this is your Drizzle DB import
-import { CourseList } from '../../configs/schema'; // Assuming this is your Drizzle schema import
 import { v4 as uuidv4 } from 'uuid'; // v4 is a named export, so it's a good practice to name it correctly
 import { useRouter } from 'next/navigation';
 
@@ -37,7 +35,7 @@ function CreateCourse() {
     const [loading, setLoading] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const { user } = useUser();
-    const router=useRouter();
+    const router = useRouter();
 
     useEffect(() => {
         console.log(userCourseInput);
@@ -57,52 +55,52 @@ function CreateCourse() {
     };
 
     const GenerateCourseLayout = async () => {
-    setLoading(true);
-    const BASIC_PROMPT = 'Create A Course Tutorial on Following Detail With Field as Course Name, Description, Along with Chapter Name, about, Duration: '
-    const USER_INPUT_PROMPT = 'Category: ' + userCourseInput?.category + ' , Topic:' + userCourseInput?.topic + ' , Level:' + userCourseInput?.Level + ', Duration:' + userCourseInput?.Duration + ', Display Video:' + userCourseInput?.displayVideo + ',NoOfChapters:' + userCourseInput?.NoOfChapter + ' ,in JSON format'
-    const FINAL_PROMPT = BASIC_PROMPT + USER_INPUT_PROMPT;
-    console.log(FINAL_PROMPT);
+        setLoading(true);
+        const BASIC_PROMPT = 'Create A Course Tutorial on Following Detail With Field as Course Name, Description, Along with Chapter Name, about, Duration: '
+        const USER_INPUT_PROMPT = 'Category: ' + userCourseInput?.category + ' , Topic:' + userCourseInput?.topic + ' , Level:' + userCourseInput?.Level + ', Duration:' + userCourseInput?.Duration + ', Display Video:' + userCourseInput?.displayVideo + ',NoOfChapters:' + userCourseInput?.NoOfChapter + ' ,in JSON format'
+        const FINAL_PROMPT = BASIC_PROMPT + USER_INPUT_PROMPT;
+        console.log(FINAL_PROMPT);
 
-    try {
-        const result = await GenerateCourseLayout_AI.sendMessage(FINAL_PROMPT);
-        const parsedResult = JSON.parse(result.response?.text());
-        console.log(parsedResult);
-        
-        // Generate courseId here
-        const courseId = uuidv4();
-        await SaveCourseLayoutInDb(parsedResult, courseId);
+        try {
+            const result = await GenerateCourseLayout_AI.sendMessage(FINAL_PROMPT);
+            const parsedResult = JSON.parse(result.response?.text());
+            console.log(parsedResult);
 
-    } catch (error) {
-        console.error('Error generating course layout:', error);
-        setLoading(false);
+            // Generate courseId here
+            const courseId = uuidv4();
+            await SaveCourseLayoutInDb(parsedResult, courseId);
+
+        } catch (error) {
+            console.error('Error generating course layout:', error);
+            setLoading(false);
+        }
     }
-}
 
     const SaveCourseLayoutInDb = async (courseLayout, courseId) => {
-    try {
-        const result = await db.insert(CourseList).values({
-            courseId: courseId,
-            name: userCourseInput?.topic,
-            level: userCourseInput?.Level,
-            category: userCourseInput?.category,
-            courseOutput: courseLayout,
-            createdBy: user?.primaryEmailAddress?.emailAddress,
-            userName: user?.fullName,
-            userProfileImage: user?.imageUrl,
-            includeVideo: userCourseInput?.displayVideo
-        });
-        console.log("Course saved successfully with ID:", courseId);
-        
-        // Navigate to the course page
-        router.replace('/create-course/' + courseId);
-        
-    } catch (error) {
-        console.error("Error saving course to DB:", error);
-    } finally {
-        console.log("Saving process finished.");
-        setLoading(false);
+        try {
+            const result = await fetch('/api/courses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    courseId: courseId,
+                    name: userCourseInput?.topic,
+                    level: userCourseInput?.Level,
+                    category: userCourseInput?.category,
+                    courseOutput: courseLayout,
+                    createdBy: user?.primaryEmailAddress?.emailAddress,
+                    userName: user?.fullName,
+                    userProfileImage: user?.imageUrl,
+                    includeVideo: userCourseInput?.displayVideo
+                })
+            });
+            console.log("Course saved successfully with ID:", courseId);
+            router.replace('/create-course/' + courseId);
+        } catch (error) {
+            console.error("Error saving course to DB:", error);
+        } finally {
+            setLoading(false);
+        }
     }
-}
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -120,11 +118,10 @@ function CreateCourse() {
                         <div key={item.id} className='flex items-center'>
                             {/* Step Circle and Text */}
                             <div className='flex flex-col items-center'>
-                                <div className={`p-4 rounded-full text-white text-2xl transition-colors duration-300 ${
-                                    activeIndex >= index
+                                <div className={`p-4 rounded-full text-white text-2xl transition-colors duration-300 ${activeIndex >= index
                                         ? 'bg-gradient-to-r from-green-500 to-blue-500'
                                         : 'bg-gray-400'
-                                }`}>
+                                    }`}>
                                     {item.icon}
                                 </div>
                                 <h2 className='hidden md:block md:text-sm text-gray-400 mt-3 text-center font-medium'>{item.name}</h2>
@@ -132,11 +129,10 @@ function CreateCourse() {
 
                             {/* Connector Line - only if not the last item */}
                             {index < StepperOptions.length - 1 && (
-                                <div className={`h-1 w-[80px] md:w-[120px] lg:w-[150px] rounded-full mx-6 transition-colors duration-300 ${
-                                    activeIndex > index
+                                <div className={`h-1 w-[80px] md:w-[120px] lg:w-[150px] rounded-full mx-6 transition-colors duration-300 ${activeIndex > index
                                         ? 'bg-gradient-to-r from-green-600 to-blue-600'
                                         : 'bg-gray-300'
-                                }`}></div>
+                                    }`}></div>
                             )}
                         </div>
                     ))}

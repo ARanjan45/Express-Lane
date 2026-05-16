@@ -844,12 +844,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 📧 Contact
 
 - LinkedIn: [linkedin.com/in/AprajitaRanjan](https://www.linkedin.com/in/aprajita-ranjan-961a0523b)
